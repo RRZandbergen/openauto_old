@@ -175,6 +175,7 @@ void SettingsWindow::loadButtonCheckBoxes()
     ui_->checkBoxScrollWheelButton->setChecked(std::find(buttonCodes.begin(), buttonCodes.end(), aasdk::proto::enums::ButtonCode::SCROLL_WHEEL) != buttonCodes.end());
     ui_->checkBoxBackButton->setChecked(std::find(buttonCodes.begin(), buttonCodes.end(), aasdk::proto::enums::ButtonCode::BACK) != buttonCodes.end());
     ui_->checkBoxEnterButton->setChecked(std::find(buttonCodes.begin(), buttonCodes.end(), aasdk::proto::enums::ButtonCode::ENTER) != buttonCodes.end());
+    ui_->checkBoxNightButton->setChecked(std::find(buttonCodes.begin(), buttonCodes.end(), aasdk::proto::enums::ButtonCode::NIGHT) != buttonCodes.end());
 }
 
 void SettingsWindow::setButtonCheckBoxes(bool value)
@@ -195,6 +196,7 @@ void SettingsWindow::setButtonCheckBoxes(bool value)
     ui_->checkBoxScrollWheelButton->setChecked(value);
     ui_->checkBoxBackButton->setChecked(value);
     ui_->checkBoxEnterButton->setChecked(value);
+    ui_->checkBoxNightButton->setChecked(value);
 }
 
 void SettingsWindow::saveButtonCheckBoxes()
@@ -216,6 +218,7 @@ void SettingsWindow::saveButtonCheckBoxes()
     this->saveButtonCheckBox(ui_->checkBoxScrollWheelButton, buttonCodes, aasdk::proto::enums::ButtonCode::SCROLL_WHEEL);
     this->saveButtonCheckBox(ui_->checkBoxBackButton, buttonCodes, aasdk::proto::enums::ButtonCode::BACK);
     this->saveButtonCheckBox(ui_->checkBoxEnterButton, buttonCodes, aasdk::proto::enums::ButtonCode::ENTER);
+    this->saveButtonCheckBox(ui_->checkBoxNightButton, buttonCodes, aasdk::proto::enums::ButtonCode::NIGHT);
     configuration_->setButtonCodes(buttonCodes);
 }
 
@@ -250,7 +253,8 @@ void SettingsWindow::onShowBindings()
                             + QString("Toggle play -> [B]/[Media Play] \n")
                             + QString("Voice command -> [M] \n")
                             + QString("Wheel left -> [1] \n")
-                            + QString("Wheel right -> [2]");
+                            + QString("Wheel right -> [2] \n")
+                            + QString("Night Mode -> G");
 
     QMessageBox confirmationMessage(QMessageBox::Information, "Information", message, QMessageBox::Ok);
     confirmationMessage.setWindowFlags(Qt::WindowStaysOnTopHint);

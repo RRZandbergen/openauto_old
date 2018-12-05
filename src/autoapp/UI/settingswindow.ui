@@ -699,6 +699,19 @@ color: rgb(238, 238, 236);</string>
       <string>Call end</string>
      </property>
     </widget>
+    <widget class="QCheckBox" name="checkBoxNightButton">
+      <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>400</y>
+       <width>92</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Night Mode</string>
+     </property>
+    </widget>
     <widget class="QCheckBox" name="checkBoxVoiceCommandButton">
      <property name="geometry">
       <rect>

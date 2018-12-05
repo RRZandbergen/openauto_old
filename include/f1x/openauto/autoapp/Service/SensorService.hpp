@@ -20,6 +20,8 @@
 
 #include <f1x/aasdk/Channel/Sensor/SensorServiceChannel.hpp>
 #include <f1x/openauto/autoapp/Service/IService.hpp>
+#include <fstream>
+#include <f1x/aasdk/IO/Promise.hpp>
 
 namespace f1x
 {
@@ -33,22 +35,32 @@ namespace service
 class SensorService: public aasdk::channel::sensor::ISensorServiceChannelEventHandler, public IService, public std::enable_shared_from_this<SensorService>
 {
 public:
+    //aasdk::io::Promise<void> Promise;
     SensorService(boost::asio::io_service& ioService, aasdk::messenger::IMessenger::Pointer messenger);
-
+    bool isNight = false;
+    bool previous = false;
     void start() override;
     void stop() override;
     void fillFeatures(aasdk::proto::messages::ServiceDiscoveryResponse& response) override;
     void onChannelOpenRequest(const aasdk::proto::messages::ChannelOpenRequest& request) override;
     void onSensorStartRequest(const aasdk::proto::messages::SensorStartRequestMessage& request) override;
     void onChannelError(const aasdk::error::Error& e) override;
-
+    
+    //virtual void nightMessage(Promise::Pointer promise) = 0;
 private:
     using std::enable_shared_from_this<SensorService>::shared_from_this;
     void sendDrivingStatusUnrestricted();
     void sendNightData();
+    bool is_file_exist(const char *filename);
+    void nightSensorPolling();
+    boost::asio::deadline_timer timer_;
+    //void onTimerExceeded(const boost::system::error_code& error)
 
     boost::asio::io_service::strand strand_;
     aasdk::channel::sensor::SensorServiceChannel::Pointer channel_;
+    
+
+    
 };
 
 }

@@ -128,6 +128,7 @@ private:
     static const std::string cInputScrollWheelButtonKey;
     static const std::string cInputBackButtonKey;
     static const std::string cInputEnterButtonKey;
+    static const std::string cInputNightButtonKey;
 };
 
 }

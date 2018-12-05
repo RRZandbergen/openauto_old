@@ -31,6 +31,7 @@ namespace service
 
 SensorService::SensorService(boost::asio::io_service& ioService, aasdk::messenger::IMessenger::Pointer messenger)
     : strand_(ioService)
+    , timer_(ioService)
     , channel_(std::make_shared<aasdk::channel::sensor::SensorServiceChannel>(strand_, std::move(messenger)))
 {
 
@@ -39,6 +40,7 @@ SensorService::SensorService(boost::asio::io_service& ioService, aasdk::messenge
 void SensorService::start()
 {
     strand_.dispatch([this, self = this->shared_from_this()]() {
+        this->nightSensorPolling();
         OPENAUTO_LOG(info) << "[SensorService] start.";
         channel_->receive(this->shared_from_this());
     });
@@ -121,7 +123,16 @@ void SensorService::sendDrivingStatusUnrestricted()
 void SensorService::sendNightData()
 {
     aasdk::proto::messages::SensorEventIndication indication;
-    indication.add_night_mode()->set_is_night(false);
+    if(SensorService::isNight)
+    {
+	indication.add_night_mode()->set_is_night(true);
+	OPENAUTO_LOG(info) << "Night Mode";
+    }
+    else
+    {
+	indication.add_night_mode()->set_is_night(false);
+	OPENAUTO_LOG(info) << "Day Mode";
+    }
 
     auto promise = aasdk::channel::SendPromise::defer(strand_);
     promise->then([]() {}, std::bind(&SensorService::onChannelError, this->shared_from_this(), std::placeholders::_1));
@@ -132,6 +143,78 @@ void SensorService::onChannelError(const aasdk::error::Error& e)
 {
     OPENAUTO_LOG(error) << "[SensorService] channel error: " << e.what();
 }
+
+bool SensorService::is_file_exist(const char *fileName)
+{
+    std::ifstream ifile(fileName, std::ios::in);
+    return ifile.good();
+}
+
+void SensorService::nightSensorPolling()
+{
+    strand_.dispatch([this, self = this->shared_from_this()]() {
+        this->isNight = is_file_exist("/tmp/night_mode_enabled");
+        if(this->previous != this->isNight)
+        {
+             OPENAUTO_LOG(info) << "[night] = " << this->isNight;
+            this->previous = this->isNight;
+            this->sendNightData();
+        }
+        
+        timer_.expires_from_now(boost::posix_time::seconds(2));
+        //timer_.async_wait(this->nightSensorPolling());
+        //timer_.expires_from_now(boost::posix_time::milliseconds(5000));
+        //this->nightSensorPolling();
+        timer_.async_wait(strand_.wrap(std::bind(&SensorService::nightSensorPolling, this->shared_from_this())));
+    });
+
+}
+
+//void nightMessage(Promise::Pointer promise)
+//{
+  /*  strand_.dispatch([this, self = this->shared_from_this(), promise = std::move(promise)]() mutable {
+        if(promise_ != nullptr)
+        {
+            promise_->reject(aasdk::error::Error(aasdk::error::ErrorCode::OPERATION_IN_PROGRESS));
+        }
+        else
+        {
+            if(this->previous != this-isNight)
+            {
+                SensorService.sendNightData();
+            }
+            promise_ = std::move(promise);
+            timer_.expires_from_now(boost::posix_time::milliseconds(5000));
+            timer_.async_wait(strand_.wrap(std::bind(&SensorService::onTimerExceeded, this->shared_from_this(), std::placeholders::_1)));
+        }
+    });*/
+//}
+
+/*void SensorService::onTimerExceeded(const boost::system::error_code& error)
+{
+    if(promise_ == nullptr)
+    {
+        return;
+    }
+    else if(error == boost::asio::error::operation_aborted || cancelled_)
+    {
+        promise_->reject(aasdk::error::Error(aasdk::error::ErrorCode::OPERATION_ABORTED));
+    }
+    else if(pingsCount_ - pongsCount_ > 1)
+    {
+        promise_->reject(aasdk::error::Error());
+    }
+    else
+    {
+        promise_->resolve();
+    }
+
+    promise_.reset();
+}*/
+/*bool is_file_exist(const std::string& name) {
+  struct stat buffer;   
+  return (stat (name.c_str(), &buffer) == 0); 
+}*/
 
 }
 }
