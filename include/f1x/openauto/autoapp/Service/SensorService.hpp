@@ -45,6 +45,7 @@ public:
     void onChannelOpenRequest(const aasdk::proto::messages::ChannelOpenRequest& request) override;
     void onSensorStartRequest(const aasdk::proto::messages::SensorStartRequestMessage& request) override;
     void onChannelError(const aasdk::error::Error& e) override;
+    bool stopPolling = false;
     
     //virtual void nightMessage(Promise::Pointer promise) = 0;
 private:
@@ -54,6 +55,7 @@ private:
     bool is_file_exist(const char *filename);
     void nightSensorPolling();
     boost::asio::deadline_timer timer_;
+    bool firstRun = true;
     //void onTimerExceeded(const boost::system::error_code& error)
 
     boost::asio::io_service::strand strand_;
