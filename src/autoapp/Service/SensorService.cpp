@@ -52,6 +52,7 @@ void SensorService::start()
 
 void SensorService::stop()
 {
+    this->stopPolling = true;
     strand_.dispatch([this, self = this->shared_from_this()]() {
         OPENAUTO_LOG(info) << "[SensorService] stop.";
     });
@@ -162,22 +163,24 @@ bool SensorService::is_file_exist(const char *fileName)
 
 void SensorService::nightSensorPolling()
 {
-    strand_.dispatch([this, self = this->shared_from_this()]() {
-        this->isNight = is_file_exist("/home/pi/night");
-        if(this->previous != this->isNight && !firstRun)
-        {
-             OPENAUTO_LOG(info) << "[night] = " << this->isNight;
-            this->previous = this->isNight;
-            this->sendNightData();
-        }
-        
-        timer_.expires_from_now(boost::posix_time::seconds(5));
-        //timer_.async_wait(this->nightSensorPolling());
-        //timer_.expires_from_now(boost::posix_time::milliseconds(5000));
-        //this->nightSensorPolling();
-        timer_.async_wait(strand_.wrap(std::bind(&SensorService::nightSensorPolling, this->shared_from_this())));
-    });
-
+    if(!this->stopPolling)
+    {
+        OPENAUTO_LOG(info) << "Polling";
+        strand_.dispatch([this, self = this->shared_from_this()]() {
+            this->isNight = is_file_exist("/home/pi/night");
+            if(this->previous != this->isNight && !firstRun)
+            {
+                this->previous = this->isNight;
+                this->sendNightData();
+            }
+            
+            timer_.expires_from_now(boost::posix_time::seconds(2));
+            //timer_.async_wait(this->nightSensorPolling());
+            //timer_.expires_from_now(boost::posix_time::milliseconds(5000));
+            //this->nightSensorPolling();
+            timer_.async_wait(strand_.wrap(std::bind(&SensorService::nightSensorPolling, this->shared_from_this())));
+        });
+    }
 }
 
 //void nightMessage(Promise::Pointer promise)
