@@ -40,6 +40,10 @@ SensorService::SensorService(boost::asio::io_service& ioService, aasdk::messenge
 void SensorService::start()
 {
     strand_.dispatch([this, self = this->shared_from_this()]() {
+        if(this->isNight = is_file_exist("/home/pi/night"))
+        {
+            this->isNight = true;
+        }
         this->nightSensorPolling();
         OPENAUTO_LOG(info) << "[SensorService] start.";
         channel_->receive(this->shared_from_this());
@@ -137,6 +141,12 @@ void SensorService::sendNightData()
     auto promise = aasdk::channel::SendPromise::defer(strand_);
     promise->then([]() {}, std::bind(&SensorService::onChannelError, this->shared_from_this(), std::placeholders::_1));
     channel_->sendSensorEventIndication(indication, std::move(promise));
+    if(this->firstRun)
+    {
+        this->firstRun = false;
+        this->previous = this->isNight;
+    }
+    OPENAUTO_LOG(info) << "Finished Mode Change";
 }
 
 void SensorService::onChannelError(const aasdk::error::Error& e)
@@ -153,15 +163,15 @@ bool SensorService::is_file_exist(const char *fileName)
 void SensorService::nightSensorPolling()
 {
     strand_.dispatch([this, self = this->shared_from_this()]() {
-        this->isNight = is_file_exist("/tmp/night_mode_enabled");
-        if(this->previous != this->isNight)
+        this->isNight = is_file_exist("/home/pi/night");
+        if(this->previous != this->isNight && !firstRun)
         {
              OPENAUTO_LOG(info) << "[night] = " << this->isNight;
             this->previous = this->isNight;
             this->sendNightData();
         }
         
-        timer_.expires_from_now(boost::posix_time::seconds(2));
+        timer_.expires_from_now(boost::posix_time::seconds(5));
         //timer_.async_wait(this->nightSensorPolling());
         //timer_.expires_from_now(boost::posix_time::milliseconds(5000));
         //this->nightSensorPolling();
