@@ -168,7 +168,7 @@ void SensorService::nightSensorPolling()
     {
         OPENAUTO_LOG(info) << "Polling";
         strand_.dispatch([this, self = this->shared_from_this()]() {
-            this->isNight = is_file_exist("/night/mode/enabled");
+            this->isNight = is_file_exist("/tmp/night_mode_enabled");
             if(this->previous != this->isNight && !firstRun)
             {
                 this->previous = this->isNight;
