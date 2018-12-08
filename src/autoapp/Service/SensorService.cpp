@@ -20,6 +20,7 @@
 #include <f1x/openauto/Common/Log.hpp>
 #include <f1x/openauto/autoapp/Service/SensorService.hpp>
 
+
 namespace f1x
 {
 namespace openauto
@@ -39,8 +40,25 @@ SensorService::SensorService(boost::asio::io_service& ioService, aasdk::messenge
 
 void SensorService::start()
 {
+    if ( apds.init() ) {
+		OPENAUTO_LOG(info) << "APDS-9960 initialization complete" ;
+	} else {
+		OPENAUTO_LOG(info) << "Something went wrong during APDS-9960 init!" ;
+	}
+
+	// Start running the APDS-9960 light sensor (no interrupts)
+	if ( apds.enableLightSensor(false) ) {
+		OPENAUTO_LOG(info) << "Light sensor is now running" ;
+	} else {
+		OPENAUTO_LOG(info) << "Something went wrong during sensor init!";
+	}
+
+	// Wait for initialization and calibration to finish
+	//delay(500);
+
     strand_.dispatch([this, self = this->shared_from_this()]() {
-        if(is_file_exist("/tmp/night_mode_enabled"))
+        //if(is_file_exist("/tmp/night_mode_enabled"))
+        if(readSensor() || is_file_exist("/tmp/night_mode_enabled"))
         {
             this->isNight = true;
         }
@@ -168,7 +186,15 @@ void SensorService::nightSensorPolling()
     {
         OPENAUTO_LOG(info) << "Polling";
         strand_.dispatch([this, self = this->shared_from_this()]() {
-            this->isNight = is_file_exist("/tmp/night_mode_enabled");
+            //this->isNight = is_file_exist("/tmp/night_mode_enabled");
+            if(readSensor() || is_file_exist("/tmp/night_mode_enabled"))
+            {
+                this->isNight = true;
+            }
+            else
+            {
+                this->isNight = false;
+            }
             if(this->previous != this->isNight && !firstRun)
             {
                 this->previous = this->isNight;
@@ -184,6 +210,23 @@ void SensorService::nightSensorPolling()
     }
 }
 
+bool SensorService::readSensor()
+{
+    if (!apds.readAmbientLight(ambient_light)) {
+			 OPENAUTO_LOG(info) << "Error reading light values";
+		}
+	else {
+        if(ambient_light < 200)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    return false;
+}
 //void nightMessage(Promise::Pointer promise)
 //{
   /*  strand_.dispatch([this, self = this->shared_from_this(), promise = std::move(promise)]() mutable {

@@ -22,6 +22,7 @@
 #include <f1x/openauto/autoapp/Service/IService.hpp>
 #include <fstream>
 #include <f1x/aasdk/IO/Promise.hpp>
+#include <f1x/openauto/autoapp/Service/APDS9960_RPi.h>
 
 namespace f1x
 {
@@ -46,7 +47,11 @@ public:
     void onSensorStartRequest(const aasdk::proto::messages::SensorStartRequestMessage& request) override;
     void onChannelError(const aasdk::error::Error& e) override;
     bool stopPolling = false;
-    
+    APDS9960_RPi apds = APDS9960_RPi();
+    uint16_t ambient_light = 0;
+    uint16_t red_light = 0;
+    uint16_t green_light = 0;
+    uint16_t blue_light = 0;
     //virtual void nightMessage(Promise::Pointer promise) = 0;
 private:
     using std::enable_shared_from_this<SensorService>::shared_from_this;
@@ -54,6 +59,7 @@ private:
     void sendNightData();
     bool is_file_exist(const char *filename);
     void nightSensorPolling();
+    bool readSensor();
     boost::asio::deadline_timer timer_;
     bool firstRun = true;
     //void onTimerExceeded(const boost::system::error_code& error)
