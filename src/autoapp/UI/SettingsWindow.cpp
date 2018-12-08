@@ -196,7 +196,7 @@ void SettingsWindow::setButtonCheckBoxes(bool value)
     ui_->checkBoxScrollWheelButton->setChecked(value);
     ui_->checkBoxBackButton->setChecked(value);
     ui_->checkBoxEnterButton->setChecked(value);
-    ui_->checkBoxNightButton->setChecked(value);
+    //ui_->checkBoxNightButton->setChecked(value);
 }
 
 void SettingsWindow::saveButtonCheckBoxes()
@@ -218,7 +218,7 @@ void SettingsWindow::saveButtonCheckBoxes()
     this->saveButtonCheckBox(ui_->checkBoxScrollWheelButton, buttonCodes, aasdk::proto::enums::ButtonCode::SCROLL_WHEEL);
     this->saveButtonCheckBox(ui_->checkBoxBackButton, buttonCodes, aasdk::proto::enums::ButtonCode::BACK);
     this->saveButtonCheckBox(ui_->checkBoxEnterButton, buttonCodes, aasdk::proto::enums::ButtonCode::ENTER);
-    this->saveButtonCheckBox(ui_->checkBoxNightButton, buttonCodes, aasdk::proto::enums::ButtonCode::NIGHT);
+    //this->saveButtonCheckBox(ui_->checkBoxNightButton, buttonCodes, aasdk::proto::enums::ButtonCode::NIGHT);
     configuration_->setButtonCodes(buttonCodes);
 }
 
@@ -253,8 +253,7 @@ void SettingsWindow::onShowBindings()
                             + QString("Toggle play -> [B]/[Media Play] \n")
                             + QString("Voice command -> [M] \n")
                             + QString("Wheel left -> [1] \n")
-                            + QString("Wheel right -> [2] \n")
-                            + QString("Night Mode -> G");
+                            + QString("Wheel right -> [2] \n");
 
     QMessageBox confirmationMessage(QMessageBox::Information, "Information", message, QMessageBox::Ok);
     confirmationMessage.setWindowFlags(Qt::WindowStaysOnTopHint);
