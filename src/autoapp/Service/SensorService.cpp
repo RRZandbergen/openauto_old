@@ -40,7 +40,7 @@ SensorService::SensorService(boost::asio::io_service& ioService, aasdk::messenge
 void SensorService::start()
 {
     strand_.dispatch([this, self = this->shared_from_this()]() {
-        if(this->isNight = is_file_exist("/home/pi/night"))
+        if(is_file_exist("/tmp/night_mode_enabled"))
         {
             this->isNight = true;
         }
@@ -128,6 +128,7 @@ void SensorService::sendDrivingStatusUnrestricted()
 void SensorService::sendNightData()
 {
     aasdk::proto::messages::SensorEventIndication indication;
+    
     if(SensorService::isNight)
     {
 	indication.add_night_mode()->set_is_night(true);
@@ -167,7 +168,7 @@ void SensorService::nightSensorPolling()
     {
         OPENAUTO_LOG(info) << "Polling";
         strand_.dispatch([this, self = this->shared_from_this()]() {
-            this->isNight = is_file_exist("/home/pi/night");
+            this->isNight = is_file_exist("/night/mode/enabled");
             if(this->previous != this->isNight && !firstRun)
             {
                 this->previous = this->isNight;
