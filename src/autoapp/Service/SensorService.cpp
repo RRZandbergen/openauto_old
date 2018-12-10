@@ -216,7 +216,7 @@ bool SensorService::readSensor()
 			 OPENAUTO_LOG(info) << "Error reading light values";
 		}
 	else {
-        if(ambient_light < 200)
+        if(ambient_light < 10000)
         {
             return true;
         }
