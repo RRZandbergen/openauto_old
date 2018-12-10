@@ -266,7 +266,7 @@ bool APDS9960_RPi::enableLightSensor(bool interrupts)
 {
 	
 	/* Set default gain, interrupts, enable power, and enable sensor */
-	if( !setAmbientLightGain(DEFAULT_AGAIN) ) {
+	if( !setAmbientLightGain(AGAIN_1X) ) {
 		return false;
 	}
 	if( interrupts ) {
